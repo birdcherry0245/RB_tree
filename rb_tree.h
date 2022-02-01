@@ -241,7 +241,7 @@ private:
             if (IsLeftSon(node)) {
                 Node* brother = node->parent->right;
                 if (brother->color == Color::RED) {
-                    node->parent-color = Color::RED;
+                    node->parent->color = Color::RED;
                     brother->color = Color::BLACK;
                     LeftRotation(node->parent);
                     brother = node->parent->right;
@@ -265,7 +265,7 @@ private:
             } else {
                 Node* brother = node->parent->left;
                 if (brother->color == Color::RED) {
-                    node->parent-color = Color::RED;
+                    node->parent->color = Color::RED;
                     brother->color = Color::BLACK;
                     RightRotation(node->parent);
                     brother = node->parent->left;
@@ -289,7 +289,7 @@ private:
             }
         }
         node->color = Color::BLACK;
-        root-color = Color::BLACK;
+        root->color = Color::BLACK;
     }
     
     void erase(Node* node) {
@@ -386,6 +386,10 @@ public:
             }
             FixInsert(new_node);
         }
+    }
+    
+    void erase(const T& key) {
+        erase(find(key));
     }
     
     T lower_bound(const T& key) const {
