@@ -32,9 +32,11 @@ int main() {
     RB_tree<int> tree;
     set<int> s;
     
-    for (int i = 0; i < 100; ++i) {
+    const int MAX_KEY = 100;
+    
+    for (int i = 0; i < 20; ++i) {
         cout << "i = " << i << '\n';
-        int x = rng() % 1000;
+        int x = rng() % MAX_KEY;
         cout << "x = " << x << '\n';
         tree.insert(x);
         s.insert(x);
@@ -42,8 +44,9 @@ int main() {
         vector<int> in_order = tree.InOrder();
         cout << "InOrder: \t" << in_order << '\n';
         
+        /*
         if (i > 10) {
-            int y = rng() % 800;
+            int y = rng() % MAX_KEY * 8 / 10;
             cout << "y = " << y << '\n';
             
             
@@ -55,6 +58,7 @@ int main() {
                 return 0;
             }
         }
+        */
         
         
         vector<int> next_order = tree.NextOrder();
@@ -73,5 +77,20 @@ int main() {
         tree.Check();
         
         cout << "\n";
+    }
+    
+    cout << "\n\nerase:\n\n";
+    
+    for (int i = 0; i < 10; ++i) {
+        vector<int> elems = tree.NextOrder();
+        if (sz(elems) > 0) {
+            int x = elems[rng() % sz(elems)];
+            tree.erase(x);
+            s.erase(x);
+            
+            cout << "x = " << x << '\n';
+            cout << "tree = \t" << tree.NextOrder() << '\n';
+            cout << "set = \t" << s << '\n';
+        }
     }
 }
