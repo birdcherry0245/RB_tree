@@ -32,7 +32,7 @@ int main() {
     RB_tree<int> tree;
     set<int> s;
     
-    for (int i = 0; i < 200; ++i) {
+    for (int i = 0; i < 100; ++i) {
         cout << "i = " << i << '\n';
         int x = rng() % 1000;
         cout << "x = " << x << '\n';
@@ -40,14 +40,32 @@ int main() {
         s.insert(x);
         
         vector<int> in_order = tree.InOrder();
-        //cout << "InOrder: \t" << in_order << '\n';
+        cout << "InOrder: \t" << in_order << '\n';
+        
+        if (i > 10) {
+            int y = rng() % 800;
+            cout << "y = " << y << '\n';
+            
+            
+            cout << "lower_bound     = \t" << tree.lower_bound(y) << '\n';
+            cout << "set lower_bound = \t" << *s.lower_bound(y) << '\n';
+            
+            if (tree.lower_bound(y) != *s.lower_bound(y)) {
+                cout << "??? lower_bound\n";
+                return 0;
+            }
+        }
+        
         
         vector<int> next_order = tree.NextOrder();
         //cout << "NextOrder: \t" << next_order << '\n';
         
+        vector<int> prev_order = tree.PrevOrder();
+        reverse(all(prev_order));
+        
         //cout << "Set<int>: \t" << s << '\n';
         
-        if (next_order != in_order || vector<int>(s.begin(), s.end()) != next_order) {
+        if (next_order != in_order || vector<int>(s.begin(), s.end()) != next_order || next_order != prev_order) {
             cout << "????????????????\n";
             return 0;
         }
