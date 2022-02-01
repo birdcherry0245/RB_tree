@@ -4,6 +4,7 @@
 #include <set>
 #include <exception>
 #include <vector>
+#include <algorithm>
 
 
 template<typename T>
@@ -20,6 +21,7 @@ private:
         Node* parent;
         Color color = Color::BLACK;
     };
+    
 public:
     RB_tree() {
         size_ = 0;
@@ -234,8 +236,37 @@ private:
         root->color = Color::BLACK;
     }
     
-    void erase(Node* node) {
+    void FixErase(Node* node) {
         
+    }
+    
+    void erase(Node* node) {
+        if (node == NULL_NODE) {
+            return;
+        }
+        if (node->left != NULL_NODE && node->right != NULL_NODE) {
+            Node* nxt = next(node);
+            std::swap(node->key, nxt->key);
+            node = nxt;
+        }
+        
+        Node* to_fix = (node->left == NULL_NODE ? node->right : node->left); // can be NULL_NODE
+        
+        if (node->parent == nullptr) {
+            root = to_fix;
+        } else {
+            if (IsLeftSon(node)) {
+                node->parent->left = to_fix;
+            } else {
+                node->parent->right = to_fix;
+            }
+        }
+        to_fix->parent = node->parent;
+        
+        if (node->color == Color::BLACK) {
+            FixErase(to_fix);
+        }
+        delete node;
     }
 
     Node* find(const T& key) const {
@@ -251,19 +282,19 @@ private:
         }
         return NULL_NODE;
     }
-    Node* lower_bound(Node* node, const T& key) const {
+    Node* GetLowerBoundNode(Node* node, const T& key) const {
         if (node == NULL_NODE) {
             return NULL_NODE;
         }
         if (key < node->key) {
-            Node* left_result = lower_bound(node->left, key);
+            Node* left_result = GetLowerBoundNode(node->left, key);
             if (left_result == NULL_NODE) {
                 return node;
             }
             return left_result;
         }
         if (node->key < key) {
-            return lower_bound(node->right, key);
+            return GetLowerBoundNode(node->right, key);
         }
         return node;
     }
@@ -284,6 +315,8 @@ public:
             }
         }
         
+        size_ += 1;
+        
         if (parent == nullptr) {
             std::cout << "new root\n";
             root = new Node{key, NULL_NODE, NULL_NODE, nullptr, Color::BLACK};
@@ -298,6 +331,10 @@ public:
             }
             FixInsert(new_node);
         }
+    }
+    
+    T lower_bound(const T& key) const {
+        return GetLowerBoundNode(root, key)->key;
     }
     
     void InOrder(Node* node, std::vector<T>& out) const {
@@ -403,10 +440,24 @@ public:
         }
         return out;
     }
-    
-    void PrintNext() const {
+    void NextOrderPrint() const {
         std::cout << "print_next: \t";
         for (Node* x = Leftmost(root); x != NULL_NODE; x = next(x)) {
+            std::cout << x->key << ' ';
+        }
+        std::cout << '\n';
+    }
+    
+    std::vector<T> PrevOrder() const {
+        std::vector<T> out;
+        for (Node* x = Rightmost(root); x != NULL_NODE; x = prev(x)) {
+            out.push_back(x->key);
+        }
+        return out;
+    }
+    void PrevOrderPrint() const {
+        std::cout << "print_prev: \t";
+        for (Node* x = Rightmost(root); x != NULL_NODE; x = prev(x)) {
             std::cout << x->key << ' ';
         }
         std::cout << '\n';
