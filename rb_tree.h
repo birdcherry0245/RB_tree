@@ -237,16 +237,71 @@ private:
     }
     
     void FixErase(Node* node) {
-        
+        while (node != root && node->color == Color::BLACK) {
+            if (IsLeftSon(node)) {
+                Node* brother = node->parent->right;
+                if (brother->color == Color::RED) {
+                    node->parent-color = Color::RED;
+                    brother->color = Color::BLACK;
+                    LeftRotation(node->parent);
+                    brother = node->parent->right;
+                }
+                if (brother->left->color == Color::BLACK && brother->right->color == Color::BLACK) { // читерим
+                    brother->color = Color::RED;
+                    node = node->parent;
+                } else {
+                    if (brother->right->color == Color::BLACK) {
+                        brother->left->color = Color::RED;
+                        brother->color = Color::RED;
+                        RightRotation(brother);
+                        brother = node->parent->right;
+                    }
+                    brother->color = node->parent->color;
+					node->parent->color = Color::BLACK;
+					brother->right->color = Color::BLACK;
+					LeftRotation(node->parent);
+					break;
+                }
+            } else {
+                Node* brother = node->parent->left;
+                if (brother->color == Color::RED) {
+                    node->parent-color = Color::RED;
+                    brother->color = Color::BLACK;
+                    RightRotation(node->parent);
+                    brother = node->parent->left;
+                }
+                if (brother->right->color == Color::BLACK && brother->left->color == Color::BLACK) { // читерим
+                    brother->color = Color::RED;
+                    node = node->parent;
+                } else {
+                    if (brother->left->color == Color::BLACK) {
+                        brother->right->color = Color::RED;
+                        brother->color = Color::RED;
+                        LeftRotation(brother);
+                        brother = node->parent->left;
+                    }
+                    brother->color = node->parent->color;
+					node->parent->color = Color::BLACK;
+					brother->left->color = Color::BLACK;
+					RightRotation(node->parent);
+					break;
+                }
+            }
+        }
+        node->color = Color::BLACK;
+        root-color = Color::BLACK;
     }
     
     void erase(Node* node) {
         if (node == NULL_NODE) {
             return;
         }
+        
+        size_ -= 1;
+        
         if (node->left != NULL_NODE && node->right != NULL_NODE) {
             Node* nxt = next(node);
-            std::swap(node->key, nxt->key);
+            node->key = nxt->key;
             node = nxt;
         }
         
