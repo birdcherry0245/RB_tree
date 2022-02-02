@@ -25,62 +25,52 @@ std::ostream& operator << (std::ostream& os, const set<T>& a) {
     }
     return os;
 }
+template<typename T>
+std::ostream& operator << (std::ostream& os, const Set<T>& a) {
+    for (const T& x : a) {
+        os << x << ' ';
+    }
+    return os;
+}
 
 
+Set<int> f() {
+    Set<int> t({6, 8, 9});
+    return t;
+}
 
 int main() {
+    /*
     RB_tree<int> tree;
     set<int> s;
-    
-    const int MAX_KEY = 100;
-    
-    for (int i = 0; i < 20; ++i) {
+
+    const int MAX_KEY = 1000;
+
+    for (int i = 0; i < MAX_KEY / 2; ++i) {
         cout << "i = " << i << '\n';
         int x = rng() % MAX_KEY;
         cout << "x = " << x << '\n';
         tree.insert(x);
         s.insert(x);
-        
+
         vector<int> in_order = tree.InOrder();
         cout << "InOrder: \t" << in_order << '\n';
-        
-        /*
+
         if (i > 10) {
-            int y = rng() % MAX_KEY * 8 / 10;
+            int y = rng() % MAX_KEY;
             cout << "y = " << y << '\n';
-            
-            
-            cout << "lower_bound     = \t" << tree.lower_bound(y) << '\n';
-            cout << "set lower_bound = \t" << *s.lower_bound(y) << '\n';
-            
-            if (tree.lower_bound(y) != *s.lower_bound(y)) {
-                cout << "??? lower_bound\n";
+
+            if (tree.find(y) != (s.find(y) != s.end())) {
+                cout << "??? find\n";
                 return 0;
             }
         }
-        */
-        
-        
-        vector<int> next_order = tree.NextOrder();
-        //cout << "NextOrder: \t" << next_order << '\n';
-        
-        vector<int> prev_order = tree.PrevOrder();
-        reverse(all(prev_order));
-        
-        //cout << "Set<int>: \t" << s << '\n';
-        
-        if (next_order != in_order || vector<int>(s.begin(), s.end()) != next_order || next_order != prev_order) {
-            cout << "????????????????\n";
-            return 0;
-        }
-        
-        tree.Check();
-        
+
         cout << "\n";
     }
-    
+
     cout << "\n\nerase:\n\n";
-    
+
     while (!s.empty()) {
         vector<int> elems = tree.NextOrder();
         if (sz(elems) > 0) {
@@ -99,4 +89,29 @@ int main() {
 
         tree.Check();
     }
+    */
+
+
+
+    vector<int> v = {1, 2, 3, 4, 5};
+
+    //const RB_tree<int> t(v.begin(), v.end());
+    const Set<int> t({1, 2, 3, 4, 5});
+
+    cout << t << "\n";
+
+    Set<int> t2 = f();
+    t2.insert(10);
+
+    cout << t << "\n";
+    cout << t2 << "\n";
+
+    /*
+    int step = 0;
+    for (auto it = --t.end(); step < 100; --it, ++step) {
+        cout << *it << "\n";
+    }
+    */
+
+    return 0;
 }
