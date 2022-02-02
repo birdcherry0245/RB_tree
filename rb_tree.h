@@ -52,13 +52,13 @@ public:
         NULL_NODE = new Node;
         root = CopySubtree(other.root, other.NULL_NODE, nullptr);
     }
-    RB_tree(const RB_tree&& other): size_(other.size_) {
+    RB_tree(RB_tree&& other): size_(other.size_) {
         NULL_NODE = new Node;
         root = CopySubtree(other.root, other.NULL_NODE, nullptr);
     }
 
     RB_tree& operator = (const RB_tree& other) = default;
-    RB_tree& operator = (const RB_tree&& other) = default;
+    RB_tree& operator = (RB_tree&& other) = default;
 
     ~RB_tree() {
         DeleteSubtree(root);
@@ -446,8 +446,8 @@ public:
         return Iterator(this, NULL_NODE);
     }
 
-    bool find(const T& key) {
-        return FindNode(key) != NULL_NODE;
+    Iterator find(const T& key) {
+        return Iterator(this, FindNode(key));
     }
 
     void insert(const T& key) {
@@ -487,8 +487,8 @@ public:
         erase(FindNode(key));
     }
 
-    T lower_bound(const T& key) const {
-        return GetLowerBoundNode(root, key)->key;
+    Iterator lower_bound(const T& key) const {
+        return Iterator(this, GetLowerBoundNode(root, key));
     }
 
     void InOrder(Node* node, std::vector<T>& out) const {
