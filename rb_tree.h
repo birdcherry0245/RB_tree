@@ -31,43 +31,37 @@ public:
         root = NULL_NODE;
     }
 
-    explicit RB_tree(const std::vector<T>& sorted_elems) {
-        std::cout << "RB_tree(const std::vector<T>& sorted_elems)\n";
-        size_ = 0;
-        NULL_NODE = new Node{};
-        root = Build(sorted_elems.begin(), sorted_elems.end(), nullptr);
-        ColorBalancedTree(root, GetHeight(root), 1);
-    }
     template<typename IteratorType>
     RB_tree(IteratorType first, IteratorType last) {
-        if (std::is_sorted(first, last)) {
-            RB_tree(std::vector<T>(first, last));
-        } else {
-            size_ = 0;
-            NULL_NODE = new Node{};
-            root = NULL_NODE;
-            for (; first != last; ++first) {
-                insert(*first);
-            }
+        std::vector<T> elems(first, last);
+        if (!std::is_sorted(elems.begin(), elems.end())) {
+            std::sort(elems.begin(), elems.end());
         }
+        BuildTreeFromSorted(elems);
     }
 
     explicit RB_tree(std::initializer_list<T> init_list) {
         std::vector<T> elems(init_list);
-        if (std::is_sorted(elems.begin(), elems.end())) {
-            RB_tree(elems);
-        } else {
-            size_ = 0;
-            NULL_NODE = new Node{};
-            root = NULL_NODE;
-            for (const T &elem: elems) {
-                insert(elem);
-            }
+        if (!std::is_sorted(elems.begin(), elems.end())) {
+            std::sort(elems.begin(), elems.end());
         }
+        BuildTreeFromSorted(elems);
     }
 
+    RB_tree(const RB_tree& other): size_(other.size_) {
+        NULL_NODE = new Node;
+        root = CopySubtree(other.root, other.NULL_NODE, nullptr);
+    }
+    RB_tree(const RB_tree&& other): size_(other.size_) {
+        NULL_NODE = new Node;
+        root = CopySubtree(other.root, other.NULL_NODE, nullptr);
+    }
+
+    RB_tree& operator = (const RB_tree& other) = default;
+    RB_tree& operator = (const RB_tree&& other) = default;
+
     ~RB_tree() {
-        DeleteNode(root);
+        DeleteSubtree(root);
         delete NULL_NODE;
     }
 
@@ -114,6 +108,14 @@ private:
     Node* NULL_NODE;
     size_t size_;
 
+    void BuildTreeFromSorted(const std::vector<T>& sorted_elems) {
+        std::cout << "RB_tree(const std::vector<T>& sorted_elems)\n";
+        size_ = sorted_elems.size();
+        NULL_NODE = new Node{};
+        root = Build(sorted_elems.begin(), sorted_elems.end(), nullptr);
+        ColorBalancedTree(root, GetHeight(root), 1);
+    }
+
     template<typename IteratorType>
     Node* Build(IteratorType first, IteratorType last, Node* parent) {
         if (first == last) {
@@ -123,13 +125,16 @@ private:
         Node* node = new Node{.key = *middle, .parent = parent};
         node->left = Build(first, middle, node);
         node->right = Build(middle + 1, last, node);
+        return node;
     }
+
     size_t GetHeight(Node* node) const {
         if (node == NULL_NODE) {
             return 0;
         }
         return std::max(GetHeight(node->left), GetHeight(node->right)) + 1;
     }
+
     void ColorBalancedTree(Node* node, size_t tree_height, size_t current_depth) {
         if (node == NULL_NODE) {
             return;
@@ -141,12 +146,22 @@ private:
         ColorBalancedTree(node->right, tree_height, current_depth + 1);
     }
 
-    void DeleteNode(Node* v) {
+    Node* CopySubtree(Node* other_node, Node* other_NULL_NODE, Node* parent) {
+        if (other_node == other_NULL_NODE) {
+            return NULL_NODE;
+        }
+        Node* node = new Node{.key = other_node->key, .parent = parent, .color = other_node->color};
+        node->left = CopySubtree(other_node->left, other_NULL_NODE, node);
+        node->right = CopySubtree(other_node->right, other_NULL_NODE, node);
+        return node;
+    }
+
+    void DeleteSubtree(Node* v) {
         if (v == NULL_NODE) {
             return;
         }
-        DeleteNode(v->left);
-        DeleteNode(v->right);
+        DeleteSubtree(v->left);
+        DeleteSubtree(v->right);
         delete v;
     }
 
@@ -603,7 +618,7 @@ public:
     }
 };
 
-/*
+
 template<class T>
 class Set {
 public:
@@ -630,7 +645,7 @@ public:
         data_.erase(elem);
     }
 
-    typedef typename std::RB_tree<T>::const_iterator iterator;
+    typedef typename RB_tree<T>::Iterator iterator;
 
     iterator begin() const {
         return data_.begin();
@@ -648,6 +663,5 @@ public:
         return data_.lower_bound(elem);
     }
 private:
-    RBtree<T> data_;
+    RB_tree<T> data_;
 };
-*/
