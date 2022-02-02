@@ -72,6 +72,8 @@ public:
         const RB_tree* rb_tree_ptr;
         Node* node;
     public:
+        Iterator() = default;
+
         Iterator(const RB_tree* rb_tree_ptr, Node* node): rb_tree_ptr(rb_tree_ptr), node(node) {
         }
 
@@ -91,15 +93,23 @@ public:
             return *this;
         }
 
-        Iterator operator ++ () const {
-            return Iterator(rb_tree_ptr, rb_tree_ptr->next(node));
+        Iterator operator ++ (int) {
+            auto tmp(*this);
+            node = rb_tree_ptr->next(node);
+            return tmp;
         }
-        Iterator operator -- () const {
-            return Iterator(rb_tree_ptr, rb_tree_ptr->prev(node));
+        Iterator operator -- (int) {
+            auto tmp(*this);
+            node = rb_tree_ptr->prev(node);
+            return tmp;
         }
 
         const T& operator * () const {
             return node->key;
+        }
+
+        T* operator -> () const {
+            return &(node->key);
         }
     };
 
@@ -109,7 +119,6 @@ private:
     size_t size_;
 
     void BuildTreeFromSorted(const std::vector<T>& sorted_elems) {
-        std::cout << "RB_tree(const std::vector<T>& sorted_elems)\n";
         size_ = sorted_elems.size();
         NULL_NODE = new Node{};
         root = Build(sorted_elems.begin(), sorted_elems.end(), nullptr);
@@ -400,7 +409,7 @@ private:
         delete node;
     }
 
-    Node* FindNode(const T& key) {
+    Node* FindNode(const T& key) const {
         Node *node = root;
         while (node != NULL_NODE) {
             if (key < node->key) {
@@ -436,7 +445,7 @@ public:
     }
 
     bool empty() const {
-        return size_ > 0;
+        return size_ == 0;
     }
 
     Iterator begin() const {
@@ -446,7 +455,7 @@ public:
         return Iterator(this, NULL_NODE);
     }
 
-    Iterator find(const T& key) {
+    Iterator find(const T& key) const {
         return Iterator(this, FindNode(key));
     }
 
@@ -468,11 +477,8 @@ public:
         size_ += 1;
 
         if (parent == nullptr) {
-            std::cout << "new root\n";
             root = new Node{key, NULL_NODE, NULL_NODE, nullptr, Color::BLACK};
-            std::cout << root->left << ' ' << root->right << '\n';
         } else {
-            std::cout << "insert " << key << ' ' << parent->key << ' ' << root->key << '\n';
             Node* new_node = new Node{key, NULL_NODE, NULL_NODE, parent, Color::RED};
             if (key < parent->key) {
                 parent->left = new_node;
