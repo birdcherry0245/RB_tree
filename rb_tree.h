@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstddef>
 #include <memory>
 #include <iostream>
@@ -16,19 +18,22 @@ private:
     };
     struct Node {
         T key;
-        Node* left;
-        Node* right;
-        Node* parent;
+        Node* left = nullptr;
+        Node* right = nullptr;
+        Node* parent = nullptr;
         Color color = Color::BLACK;
     };
-    
+
 public:
     RB_tree() {
         size_ = 0;
         NULL_NODE = new Node{};
         root = NULL_NODE;
     }
-    
+
+    explicit RB_tree(const std::vector<T> sorted_elems) {
+        
+    }
     template<typename IteratorType>
     RB_tree(IteratorType first, IteratorType last) {
         size_ = 0;
@@ -38,27 +43,58 @@ public:
             insert(*first);
         }
     }
+    explicit RB_tree(std::initializer_list<T> elems) {
+        size_ = 0;
+        NULL_NODE = new Node{};
+        root = NULL_NODE;
+        for (const T& elem : elems) {
+            insert(elem);
+        }
+    }
 
     ~RB_tree() {
         DeleteNode(root);
         delete NULL_NODE;
     }
-    
-    /*
+
     class Iterator {
+        friend RB_tree;
+
+    private:
+        const RB_tree* rb_tree_ptr;
         Node* node;
-        
-        Iterator(Node* node): node(node) {
+    public:
+        Iterator(const RB_tree* rb_tree_ptr, Node* node): rb_tree_ptr(rb_tree_ptr), node(node) {
         }
-        
-        Iterator operator ++ () {
-            return Iterator(next(node));
+
+        bool operator == (const Iterator& other) const {
+            return node == other.node;
         }
-        Iterator operator -- () {
-            return Iterator(prev(node));
+        bool operator != (const Iterator& other) const {
+            return node != other.node;
+        }
+
+        Iterator& operator ++ () {
+            node = rb_tree_ptr->next(node);
+            return *this;
+        }
+        Iterator& operator -- () {
+            node = rb_tree_ptr->prev(node);
+            return *this;
+        }
+
+        Iterator operator ++ () const {
+            return Iterator(rb_tree_ptr, rb_tree_ptr->next(node));
+        }
+        Iterator operator -- () const {
+            return Iterator(rb_tree_ptr, rb_tree_ptr->prev(node));
+        }
+
+        const T& operator * () const {
+            return node->key;
         }
     };
-    */
+
 private:
     Node* root;
     Node* NULL_NODE;
@@ -73,13 +109,6 @@ private:
         delete v;
     }
 
-    size_t size() const {
-        return size_;
-    }
-    bool empty() const {
-        return size_ > 0;
-    }
-
     void LeftRotation(Node* node) {
         if (node == NULL_NODE) {
             return;
@@ -88,7 +117,7 @@ private:
         if (right == NULL_NODE) {
             return;
         }
-        
+
         if (node->parent == nullptr) {
             root = right;
         } else if (IsLeftSon(node)) {
@@ -96,7 +125,7 @@ private:
         } else {
             node->parent->right = right;
         }
-        
+
         right->parent = node->parent;
         node->right = right->left;
         if (node->right != NULL_NODE) {
@@ -113,7 +142,7 @@ private:
         if (left == NULL_NODE) {
             return;
         }
-        
+
         if (node->parent == nullptr) {
             root = left;
         } else if (IsLeftSon(node)) {
@@ -129,8 +158,8 @@ private:
         node->parent = left;
         left->right = node;
     }
-    
-    
+
+
     bool IsLeftSon(Node* node) const {
         return node->parent->left == node;
     }
@@ -146,7 +175,7 @@ private:
     Node* GetUncle(Node* node) const {
         return GetBrother(node->parent);
     }
-    
+
     Node* Leftmost(Node* node) const {
         if (node == NULL_NODE) {
             return NULL_NODE;
@@ -165,16 +194,16 @@ private:
         }
         return node;
     }
-    
+
     Node* next(Node* node) const {
         if (node == NULL_NODE) {
             return NULL_NODE;
         }
-        
+
         if (node->right != NULL_NODE) {
             return Leftmost(node->right);
         }
-        
+
         while (node != root && IsRightSon(node)) {
             node = node->parent;
         }
@@ -184,25 +213,16 @@ private:
         if (node == NULL_NODE) {
             return Rightmost(root);
         }
-        
+
         if (node->left != NULL_NODE) {
             return Rightmost(node->left);
         }
-        
+
         while (node != root && IsLeftSon(node)) {
             node = node->parent;
         }
         return (node == root ? NULL_NODE : node->parent);
     }
-    
-    /*
-    Iterator begin() const {
-        return Rightmost(root);
-    }
-    Iterator end() const {
-        return NULL_NODE;
-    }
-    */
 
     void FixInsert(Node* node) {
         while (node != root && node->parent->color == Color::RED) {
@@ -235,7 +255,7 @@ private:
         }
         root->color = Color::BLACK;
     }
-    
+
     void FixErase(Node* node) {
         while (node != root && node->color == Color::BLACK) {
             if (IsLeftSon(node)) {
@@ -291,22 +311,22 @@ private:
         node->color = Color::BLACK;
         root->color = Color::BLACK;
     }
-    
+
     void erase(Node* node) {
         if (node == NULL_NODE) {
             return;
         }
-        
+
         size_ -= 1;
-        
+
         if (node->left != NULL_NODE && node->right != NULL_NODE) {
             Node* nxt = next(node);
             node->key = nxt->key;
             node = nxt;
         }
-        
+
         Node* to_fix = (node->left == NULL_NODE ? node->right : node->left); // can be NULL_NODE
-        
+
         if (node->parent == nullptr) {
             root = to_fix;
         } else {
@@ -317,15 +337,15 @@ private:
             }
         }
         to_fix->parent = node->parent;
-        
+
         if (node->color == Color::BLACK) {
             FixErase(to_fix);
         }
         delete node;
     }
 
-    Node* find(const T& key) const {
-        Node* node = root;
+    Node* FindNode(const T& key) {
+        Node *node = root;
         while (node != NULL_NODE) {
             if (key < node->key) {
                 node = node->left;
@@ -355,10 +375,29 @@ private:
     }
 
 public:
+    size_t size() const {
+        return size_;
+    }
+
+    bool empty() const {
+        return size_ > 0;
+    }
+
+    Iterator begin() const {
+        return Iterator(this, Leftmost(root));
+    }
+    Iterator end() const {
+        return Iterator(this, NULL_NODE);
+    }
+
+    bool find(const T& key) {
+        return FindNode(key) != NULL_NODE;
+    }
+
     void insert(const T& key) {
         Node* parent = nullptr;
         Node* current = root;
-        
+
         while (current != NULL_NODE) {
             parent = current;
             if (key < current->key) {
@@ -369,9 +408,9 @@ public:
                 return;
             }
         }
-        
+
         size_ += 1;
-        
+
         if (parent == nullptr) {
             std::cout << "new root\n";
             root = new Node{key, NULL_NODE, NULL_NODE, nullptr, Color::BLACK};
@@ -387,15 +426,15 @@ public:
             FixInsert(new_node);
         }
     }
-    
+
     void erase(const T& key) {
-        erase(find(key));
+        erase(FindNode(key));
     }
-    
+
     T lower_bound(const T& key) const {
         return GetLowerBoundNode(root, key)->key;
     }
-    
+
     void InOrder(Node* node, std::vector<T>& out) const {
         if (node == NULL_NODE) {
             return;
@@ -409,7 +448,7 @@ public:
         InOrder(root, out);
         return out;
     }
-    
+
     void InOrderPrint(Node* node) const {
         if (node == NULL_NODE) {
             return;
@@ -423,7 +462,7 @@ public:
         InOrderPrint(root);
         std::cout << '\n';
     }
-    
+
     void PreOrderPrint(Node* node) const {
         if (node == NULL_NODE) {
             return;
@@ -437,7 +476,7 @@ public:
         PreOrderPrint(root);
         std::cout << '\n';
     }
-    
+
     void CheckHeight(Node* node, std::set<int>& hbs, int hb = 0) const {
         if (node == NULL_NODE) {
             hbs.insert(hb);
@@ -454,7 +493,7 @@ public:
             throw std::runtime_error("Height Error\n");
         }
     }
-    
+
     bool CheckColors(Node* node) const {
         if (node == NULL_NODE) {
             return true;
@@ -471,19 +510,19 @@ public:
             throw std::runtime_error("Color Error\n");
         }
     }
-    
+
     void CheckRoot() const {
         if (root->color == Color::RED) {
             throw std::runtime_error("Root Error\n");
         }
     }
-    
+
     void Check() const {
         CheckColors();
         CheckHeight();
         CheckRoot();
     }
-    
+
     void fck() const {
         if (root->left != NULL_NODE) {
             if (root->left->color == Color::BLACK) {
@@ -491,7 +530,7 @@ public:
             }
         }
     }
-    
+
     std::vector<T> NextOrder() const {
         std::vector<T> out;
         for (Node* x = Leftmost(root); x != NULL_NODE; x = next(x)) {
@@ -506,7 +545,7 @@ public:
         }
         std::cout << '\n';
     }
-    
+
     std::vector<T> PrevOrder() const {
         std::vector<T> out;
         for (Node* x = Rightmost(root); x != NULL_NODE; x = prev(x)) {
