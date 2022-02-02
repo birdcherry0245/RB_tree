@@ -81,16 +81,22 @@ int main() {
     
     cout << "\n\nerase:\n\n";
     
-    for (int i = 0; i < 10; ++i) {
+    while (!s.empty()) {
         vector<int> elems = tree.NextOrder();
         if (sz(elems) > 0) {
             int x = elems[rng() % sz(elems)];
             tree.erase(x);
             s.erase(x);
-            
+
             cout << "x = " << x << '\n';
-            cout << "tree = \t" << tree.NextOrder() << '\n';
-            cout << "set = \t" << s << '\n';
         }
+        cout << "tree = \t" << tree.NextOrder() << '\n';
+        cout << "set = \t" << s << '\n';
+        if (vector<int>(s.begin(), s.end()) != tree.NextOrder() || tree.size() != s.size()) {
+            cout << "????????????????\n";
+            return 0;
+        }
+
+        tree.Check();
     }
 }
