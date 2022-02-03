@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "rb_tree.h"
+#include "test_set.h"
 
 using namespace std;
 
@@ -10,6 +10,7 @@ typedef long long ll;
 typedef pair<int, int> pii;
 
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
 
 template<typename T>
 std::ostream& operator << (std::ostream& os, const vector<T>& a) {
@@ -32,64 +33,85 @@ std::ostream& operator << (std::ostream& os, const Set<T>& a) {
     }
     return os;
 }
+template<typename T>
+std::ostream& operator << (std::ostream& os, const TestSet<T>& a) {
+    for (const T& x : a) {
+        os << x << ' ';
+    }
+    return os;
+}
 
 
-Set<int> f() {
-    Set<int> t({6, 8, 9});
+
+TestSet<int> f() {
+    TestSet<int> t({6, 8, 9});
     return t;
 }
 
 int main() {
-    /*
-    RB_tree<int> tree;
-    set<int> s;
+    const int MAX_KEY = 100;
 
-    const int MAX_KEY = 1000;
 
-    for (int i = 0; i < MAX_KEY / 2; ++i) {
-        cout << "i = " << i << '\n';
-        int x = rng() % MAX_KEY;
-        cout << "x = " << x << '\n';
-        tree.insert(x);
-        s.insert(x);
+    int n = 3;
+    vector<TestSet<int>> t(n);
 
-        vector<int> in_order = tree.InOrder();
-        cout << "InOrder: \t" << in_order << '\n';
 
-        if (i > 10) {
-            int y = rng() % MAX_KEY;
-            cout << "y = " << y << '\n';
+    for (int test = 0; test < 300; ++test) {
+        cout << "\n\ntest = " << test << "\n\n";
 
-            if (tree.find(y) != (s.find(y) != s.end())) {
-                cout << "??? find\n";
-                return 0;
+        int type = rng() % 20;
+        cout << "type = " << type << "\n";
+
+        if (type == 0) {
+            int i = rng() % n;
+            int j = rng() % n;
+            cout << "i, j = " << i << ", " << j << "\n";
+            swap(t[i], t[j]);
+        } else {
+            int i = rng() % n;
+            if (1 <= type && type <= 4) {
+                int x = rng() % MAX_KEY;
+                if (type == 1) {
+                    cout << "insert ";
+                    t[i].insert(x);
+                }
+                if (type == 2) {
+                    cout << "erase ";
+                    t[i].erase(x);
+                }
+                if (type == 3) {
+                    cout << "find ";
+                    t[i].find(x);
+                }
+                if (type == 4) {
+                    cout << "lower_bound ";
+                    t[i].lower_bound(x);
+                }
+                cout << "i, x = " << i << ", " << x << "\n";
+            }
+            if (type >= 5) {
+                vector<int> v;
+                int szv = 1 + rng() % 20;
+                for (int i = 0; i < szv; ++i) {
+                    v.push_back(rng() % MAX_KEY);
+                }
+                if (rng() % 2) {
+                    sort(v.begin(), v.end());
+                }
+                cout << "construct " << v << "\n";
+                t[i] = TestSet<int>(v.begin(), v.end());
             }
         }
 
+
         cout << "\n";
+        for (int i = 0; i < n; ++i) {
+            cout << "t[" << i << "] = " << t[i] << "\n";
+        }
+        cout << "\n";
+
     }
 
-    cout << "\n\nerase:\n\n";
-
-    while (!s.empty()) {
-        vector<int> elems = tree.NextOrder();
-        if (sz(elems) > 0) {
-            int x = elems[rng() % sz(elems)];
-            tree.erase(x);
-            s.erase(x);
-
-            cout << "x = " << x << '\n';
-        }
-        cout << "tree = \t" << tree.NextOrder() << '\n';
-        cout << "set = \t" << s << '\n';
-        if (vector<int>(s.begin(), s.end()) != tree.NextOrder() || tree.size() != s.size()) {
-            cout << "????????????????\n";
-            return 0;
-        }
-
-        tree.Check();
-    }
-    */
 
 
 
@@ -97,11 +119,11 @@ int main() {
     vector<int> v = {1, 2, 3, 4, 5};
 
     //const RB_tree<int> t(v.begin(), v.end());
-    const Set<int> t({1, 2, 3, 4, 5});
+    TestSet<int> t({1, 2, 3, 4, 5});
 
     cout << t << "\n";
 
-    Set<int> t2 = f();
+    TestSet<int> t2 = f();
     t2.insert(10);
 
     cout << t << "\n";
@@ -112,12 +134,10 @@ int main() {
         cout << *it << " ";
     }
     cout << "\n";
-    */
 
-    Set<pii> s;
-    s.insert({1, 2});
-    Set<pii>::iterator it(s.begin());
-    cout << it->first << "\n";
+
+    t2 = t2;
+    */
 
     return 0;
 }
