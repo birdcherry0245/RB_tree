@@ -34,18 +34,44 @@ public:
     template<typename IteratorType>
     RB_tree(IteratorType first, IteratorType last) {
         std::vector<T> elems(first, last);
-        if (!std::is_sorted(elems.begin(), elems.end())) {
-            std::sort(elems.begin(), elems.end());
+        bool is_sorted = true;
+        for (size_t i = 1; i < elems.size(); ++i) {
+            if (!(elems[i - 1] < elems[i])) {
+                is_sorted = false;
+                break;
+            }
         }
-        BuildTreeFromSorted(elems);
+        if (is_sorted) {
+            BuildTreeFromSorted(elems);
+        } else {
+            size_ = 0;
+            NULL_NODE = new Node{};
+            root = NULL_NODE;
+            for (const T& elem : elems) {
+                insert(elem);
+            }
+        }
     }
 
     explicit RB_tree(std::initializer_list<T> init_list) {
         std::vector<T> elems(init_list);
-        if (!std::is_sorted(elems.begin(), elems.end())) {
-            std::sort(elems.begin(), elems.end());
+        bool is_sorted = true;
+        for (size_t i = 1; i < elems.size(); ++i) {
+            if (!(elems[i - 1] < elems[i])) {
+                is_sorted = false;
+                break;
+            }
         }
-        BuildTreeFromSorted(elems);
+        if (is_sorted) {
+            BuildTreeFromSorted(elems);
+        } else {
+            size_ = 0;
+            NULL_NODE = new Node{};
+            root = NULL_NODE;
+            for (const T& elem : elems) {
+                insert(elem);
+            }
+        }
     }
 
     RB_tree(const RB_tree& other): size_(other.size_) {
@@ -57,8 +83,22 @@ public:
         root = CopySubtree(other.root, other.NULL_NODE, nullptr);
     }
 
-    RB_tree& operator = (const RB_tree& other) = default;
-    RB_tree& operator = (RB_tree&& other) = default;
+    RB_tree& operator = (const RB_tree& other) {
+        if (root != other.root) {
+            size_ = other.size_;
+            DeleteSubtree(root);
+            root = CopySubtree(other.root, other.NULL_NODE, nullptr);
+        }
+        return *this;
+    }
+    RB_tree& operator = (RB_tree&& other) {
+        if (root != other.root) {
+            size_ = other.size_;
+            DeleteSubtree(root);
+            root = CopySubtree(other.root, other.NULL_NODE, nullptr);
+        }
+        return *this;
+    }
 
     ~RB_tree() {
         DeleteSubtree(root);
@@ -342,10 +382,10 @@ private:
                         brother = node->parent->right;
                     }
                     brother->color = node->parent->color;
-					node->parent->color = Color::BLACK;
-					brother->right->color = Color::BLACK;
-					LeftRotation(node->parent);
-					break;
+                    node->parent->color = Color::BLACK;
+                    brother->right->color = Color::BLACK;
+                    LeftRotation(node->parent);
+                    break;
                 }
             } else {
                 Node* brother = node->parent->left;
@@ -366,10 +406,10 @@ private:
                         brother = node->parent->left;
                     }
                     brother->color = node->parent->color;
-					node->parent->color = Color::BLACK;
-					brother->left->color = Color::BLACK;
-					RightRotation(node->parent);
-					break;
+                    node->parent->color = Color::BLACK;
+                    brother->left->color = Color::BLACK;
+                    RightRotation(node->parent);
+                    break;
                 }
             }
         }
@@ -548,11 +588,11 @@ public:
         CheckHeight(node->left, hbs, hb);
         CheckHeight(node->right, hbs, hb);
     }
-    void CheckHeight() const {
+    void CheckHeight(const std::string& message) const {
         std::set<int> hbs;
         CheckHeight(root, hbs);
         if (hbs.size() != 1) {
-            throw std::runtime_error("Height Error\n");
+            throw std::runtime_error(message);
         }
     }
 
@@ -567,22 +607,22 @@ public:
         }
         return CheckColors(node->left) && CheckColors(node->right);
     }
-    void CheckColors() const {
+    void CheckColors(const std::string& message) const {
         if (!CheckColors(root)) {
-            throw std::runtime_error("Color Error\n");
+            throw std::runtime_error(message);
         }
     }
 
-    void CheckRoot() const {
+    void CheckRoot(const std::string& message) const {
         if (root->color == Color::RED) {
-            throw std::runtime_error("Root Error\n");
+            throw std::runtime_error(message);
         }
     }
 
-    void Check() const {
-        CheckColors();
-        CheckHeight();
-        CheckRoot();
+    void Check(const std::string& message = "") const {
+        CheckColors(message + "CheckColors()\n");
+        CheckHeight(message + "CheckHeight()\n");
+        CheckRoot(message + "CheckRoot()\n");
     }
 
     void fck() const {
